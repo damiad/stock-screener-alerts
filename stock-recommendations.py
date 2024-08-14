@@ -26,6 +26,34 @@ def get_finnhub_recommendations(stock_symbol):
         scores.append({score, recommendation['period']})
     return scores
 
+def calculate_score_zacks(zacks_rank):
+    match int(zacks_rank):
+        case 1:
+            return 95
+        case 2:
+            return 80
+        case 3:
+            return 0
+        case 4:
+            return -80
+        case 5:
+            return -95
+        case _:
+            return None
+
+def format_data(symbol, data):
+    stock_data = data[symbol]
+    score = calculate_score_zacks(stock_data['zacks_rank'])
+    period = stock_data['updated']
+    return {score, period}
+
+def get_zacks_recommendations(stock_symbol):
+    zacks_url = f'https://quote-feed.zacks.com/index?t={stock_symbol}'
+    response = requests.get(zacks_url)
+    json_response = response.json()
+    return format_data(stock_symbol, json_response)
+
+
 # def get_iex_recommendations(stock_symbol):
 #     iex_api_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 #     iex_url = f'https://cloud.iexapis.com/stable/stock/{stock_symbol}/recommendation-trends?token={iex_api_key}'
@@ -55,9 +83,12 @@ def send_pushover_notification(message):
     requests.post(pushover_url, data=pushover_data)
 
 stock_symbols = ['AAPL', 'MSFT', 'GOOGL','NVDA', 'SMCI']
+# stock_symbols = ['AAPL']
 for stock_symbol in stock_symbols:
-    recommendations = get_finnhub_recommendations(stock_symbol)
-    print(f'{stock_symbol}: {recommendations}')
+    recommendations_finnhub = get_finnhub_recommendations(stock_symbol)
+    recommendations_zacks = get_zacks_recommendations(stock_symbol)
+    print(f'{stock_symbol}:\n finnhub: {recommendations_finnhub} \n zacks: {recommendations_zacks}')
+    # print(f'{stock_symbol}: {recommendations}')
 
 # for rec in recommendations:
 #     if rec['buy'] > rec['sell']:
