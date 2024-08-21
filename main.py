@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fetchers.finnhub import get_finnhub_recommendations
 from fetchers.zacks import get_zacks_recommendations
 from alerts.pushover import send_pushover_notification
-
+from fetchers.recommendations import *
 load_dotenv()
 send_alert = os.getenv('send_alert')
 
@@ -22,13 +22,26 @@ send_alert = os.getenv('send_alert')
 #     response = requests.get(yahoo_url, headers=headers)
 #     return response.json()
 
-stock_symbols = ['AAPL', 'MSFT', 'GOOGL', 'NVDA', 'SMCI']
+# stock_symbols = ['AAPL', 'MSFT', 'GOOGL', 'NVDA', 'SMCI']
+stock_symbols = ['AAPL']
 
 for stock_symbol in stock_symbols:
-    recommendations_finnhub = get_finnhub_recommendations(stock_symbol)
-    recommendations_zacks = get_zacks_recommendations(stock_symbol)
-    print(f'{stock_symbol}:\n finnhub: {recommendations_finnhub} \n zacks: {recommendations_zacks}')
+    stock_info = StockInfo(stock_symbol)
+    print(f'{stock_symbol} Recommendations')
+    for recommendation_name in stock_info.recommendations:
+        recommendation = stock_info.recommendations[recommendation_name]
+        print(f'{recommendation_name}: score: {recommendation.get_score()}, period: {recommendation.get_period()}')
+        
+        
 
-    if send_alert and send_alert.lower() == 'true':
-        message = f'{stock_symbol} Recommendations\nFinnhub: {recommendations_finnhub}\nZacks: {recommendations_zacks}'
-        send_pushover_notification(message)
+
+        
+# for stock_symbol in stock_symbols:
+#     recommendations_finnhub = get_finnhub_recommendations(stock_symbol)
+#     recommendations_zacks = get_zacks_recommendations(stock_symbol)
+#     print(f'{stock_symbol}:\n finnhub: {recommendations_finnhub} \n zacks: {recommendations_zacks}')
+
+#     if send_alert and send_alert.lower() == 'true':
+#         message = f'{stock_symbol} Recommendations\nFinnhub: {recommendations_finnhub}\nZacks: {recommendations_zacks}'
+#         send_pushover_notification(message)
+
