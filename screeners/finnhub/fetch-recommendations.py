@@ -41,7 +41,7 @@ for index, row in enumerate(tickers_df.itertuples(), start=1):
         continue
 
     url = f"https://finnhub.io/api/v1/stock/recommendation?symbol={symbol}&token={finnhub_api_key}"
-    recommendations = safeRequest(url, maxRetries=8, delaySeconds=12)
+    recommendations = safeRequest(url, maxRetries=5, delaySeconds=17)
 
     print_progress_bar(index + 1, len(tickers_df), prefix="Processing", length=50)
 
