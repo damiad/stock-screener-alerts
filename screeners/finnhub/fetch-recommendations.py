@@ -7,7 +7,7 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 project_directory = os.path.abspath(os.path.join(script_directory, "../../"))
 sys.path.append(project_directory)
 
-from utils.utils import safeRequest
+from utils.utils import safeRequest, print_progress_bar
 
 load_dotenv()
 finnhub_api_key = os.getenv("finnhub_api_key")
@@ -28,11 +28,12 @@ tickers_df = pd.read_csv(tickers_file)
 last_symbol = get_last_processed_symbol()
 start_collecting = False if last_symbol else True
 
-for index, row in tickers_df.iterrows():
-    if row["type"] != "Common Stock":
+
+for index, row in enumerate(tickers_df.itertuples(), start=1):
+    if row.type != "Common Stock":
         continue
 
-    symbol = row["symbol"]
+    symbol = row.symbol
 
     if not start_collecting:
         if symbol == last_symbol:
@@ -41,6 +42,8 @@ for index, row in tickers_df.iterrows():
 
     url = f"https://finnhub.io/api/v1/stock/recommendation?symbol={symbol}&token={finnhub_api_key}"
     recommendations = safeRequest(url, maxRetries=8, delaySeconds=12)
+
+    print_progress_bar(index + 1, len(tickers_df), prefix="Processing", length=50)
 
     if recommendations:
         for recommendation in recommendations:
